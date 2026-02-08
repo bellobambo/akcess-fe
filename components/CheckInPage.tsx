@@ -9,30 +9,31 @@ import {
 } from "@/utils/useContractHook";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/utils/contract";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function CheckInPage() {
-  const [eventId, setEventId] = useState<bigint | undefined>(undefined);
+  const [eventId, setEventId] = useState<bigint | undefined>();
   const [ready, setReady] = useState(false);
+
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   /* ---------------------------------------------------------------------- */
-  /* Read eventId from localStorage                                          */
+  /* Read eventId from query string                                          */
   /* ---------------------------------------------------------------------- */
   useEffect(() => {
-    const stored = localStorage.getItem("akcess:checkin:eventId");
-    console.log("[CheckInPage] Stored eventId:", stored);
+    const param = searchParams.get("eventId");
 
-    if (stored !== null) {
+    if (param) {
       try {
-        setEventId(BigInt(stored));
+        setEventId(BigInt(param));
       } catch {
-        console.error("[CheckInPage] Invalid eventId in storage");
+        console.error("[CheckInPage] Invalid eventId in query:", param);
       }
     }
 
     setReady(true);
-  }, []);
+  }, [searchParams]);
 
   const { address, isConnected } = useAccount();
   const { data: event } = useGetEvent(eventId);
@@ -42,6 +43,7 @@ export default function CheckInPage() {
   /* ---------------------------------------------------------------------- */
   /* Guards                                                                 */
   /* ---------------------------------------------------------------------- */
+
   if (!ready) {
     return (
       <PageShell>
@@ -50,11 +52,11 @@ export default function CheckInPage() {
     );
   }
 
-  if (eventId === undefined) {
+  if (!eventId) {
     return (
       <PageShell>
         <p className="text-sm opacity-70 text-center">
-          No event selected for check-in
+          Invalid or missing check-in link
         </p>
       </PageShell>
     );
@@ -64,8 +66,7 @@ export default function CheckInPage() {
   const isCheckedIn = status?.[1] ?? false;
 
   function handleCheckIn() {
-    if (!isConnected || !isBooked || isCheckedIn || eventId === undefined)
-      return;
+    if (!isConnected || !isBooked || isCheckedIn || !eventId) return;
 
     checkIn({
       address: CONTRACT_ADDRESS,
@@ -78,31 +79,21 @@ export default function CheckInPage() {
   /* ---------------------------------------------------------------------- */
   /* UI                                                                     */
   /* ---------------------------------------------------------------------- */
+
   return (
     <PageShell>
-      {/* BACK BUTTON – TOP LEFT */}
+      {/* BACK BUTTON */}
       <motion.button
         onClick={() => router.back()}
         aria-label="Go back"
-        className="
-          absolute top-4 left-4
-          text-xl font-semibold
-          opacity-70 hover:opacity-100 cursor-pointer
-        "
+        className="absolute top-4 left-4 text-xl font-semibold opacity-70 hover:opacity-100"
         whileHover={{ x: -3 }}
         whileTap={{ scale: 0.95 }}
       >
         &lt;
       </motion.button>
 
-      {/* MAIN CARD */}
-      <div
-        className="rounded-xl border p-6 space-y-4 w-full max-w-sm"
-        style={{
-          borderColor: "var(--color-border)",
-          backgroundColor: "var(--color-bg)",
-        }}
-      >
+      <div className="rounded-xl border p-6 space-y-4 w-full max-w-sm">
         <h1 className="text-lg font-semibold text-center">Event check-in</h1>
 
         {event && (
@@ -124,12 +115,6 @@ export default function CheckInPage() {
           </p>
         )}
 
-        {isConnected && isBooked && !isCheckedIn && (
-          <div className="text-sm text-center text-blue-600 font-medium">
-            You have already booked this event
-          </div>
-        )}
-
         {isBooked && !isCheckedIn && (
           <motion.button
             onClick={handleCheckIn}
@@ -139,8 +124,6 @@ export default function CheckInPage() {
               backgroundColor: "var(--color-primary)",
               opacity: isPending ? 0.7 : 1,
             }}
-            whileHover={!isPending ? { scale: 1.03 } : {}}
-            whileTap={!isPending ? { scale: 0.97 } : {}}
           >
             {isPending ? "Checking in…" : "Confirm check-in"}
           </motion.button>
@@ -163,6 +146,7 @@ export default function CheckInPage() {
 /* -------------------------------------------------------------------------- */
 /* Layout                                                                     */
 /* -------------------------------------------------------------------------- */
+
 function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <div

@@ -103,9 +103,13 @@ function EventCard({ eventId }: { eventId: bigint }) {
 
   return (
     <div
-      className="rounded-xl border p-4 space-y-3"
+      className="
+    rounded-xl border p-4 space-y-3
+    focus:outline-none
+    focus-visible:outline-none
+  "
       style={{
-        borderColor: event.colorCode,
+        borderColor: "var(--color-border)",
         backgroundColor: "var(--color-bg)",
       }}
     >
@@ -115,34 +119,33 @@ function EventCard({ eventId }: { eventId: bigint }) {
         {isOrganizer && (
           <div className="flex gap-2">
             {/* Cancel event */}
-          <motion.button
-  onClick={() =>
-    cancelEvent({
-      address: CONTRACT_ADDRESS,
-      abi: CONTRACT_ABI,
-      functionName: "cancelEvent",
-      args: [eventId],
-    })
-  }
-  disabled={isCancelling}
-  className="
+            <motion.button
+              onClick={() =>
+                cancelEvent({
+                  address: CONTRACT_ADDRESS,
+                  abi: CONTRACT_ABI,
+                  functionName: "cancelEvent",
+                  args: [eventId],
+                })
+              }
+              disabled={isCancelling}
+              className="
     px-3 py-1.5
     text-xs font-medium
     rounded-md
     border cursor-pointer
   "
-  style={{
-    borderColor: "#E35D8F",
-    color: "#E35D8F",
-    backgroundColor: "transparent",
-    opacity: isCancelling ? 0.6 : 1,
-  }}
-  whileHover={!isCancelling ? { scale: 1.03 } : {}}
-  whileTap={!isCancelling ? { scale: 0.97 } : {}}
->
-  {isCancelling ? "Cancelling…" : "Cancel event"}
-</motion.button>
-
+              style={{
+                borderColor: "#E35D8F",
+                color: "#E35D8F",
+                backgroundColor: "transparent",
+                opacity: isCancelling ? 0.6 : 1,
+              }}
+              whileHover={!isCancelling ? { scale: 1.03 } : {}}
+              whileTap={!isCancelling ? { scale: 0.97 } : {}}
+            >
+              {isCancelling ? "Cancelling…" : "Cancel event"}
+            </motion.button>
 
             {/* Withdraw funds */}
             {event.totalBooked > BigInt(0) && (
@@ -249,14 +252,14 @@ function EventCard({ eventId }: { eventId: bigint }) {
           {showQR && (
             <div className="rounded-lg border p-3 text-center space-y-2">
               <p className="text-xs opacity-70">
-                Scan to open the check-in page
+                Scan to verify booking
               </p>
 
               <div className="inline-block bg-white p-2">
                 <QRCode value={checkInUrl} size={140} />
               </div>
 
-              <p className="text-xs break-all opacity-60">{checkInUrl}</p>
+              {/* <p className="text-xs break-all opacity-60">{checkInUrl}</p> */}
             </div>
           )}
         </div>

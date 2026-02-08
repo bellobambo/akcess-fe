@@ -44,7 +44,7 @@ export function WalletConnect() {
         {/* Disconnect */}
         <motion.button
           onClick={() => disconnect()}
-          className="px-4 py-2 rounded-lg text-white font-medium"
+          className="px-4 py-2 rounded-lg text-white font-medium cursor-pointer"
           style={{ backgroundColor: 'var(--color-primary)' }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

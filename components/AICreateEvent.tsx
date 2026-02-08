@@ -124,7 +124,8 @@ export function AICreateEvent() {
       >
         <h2 className="text-lg font-semibold">Akcess Agent</h2>
         <p className="text-xs opacity-70">
-Use Akcess to generate and publish events on-chain.        </p>
+          Use Akcess to generate and publish events on-chain.{" "}
+        </p>
       </div>
 
       {/* CHAT / AI OUTPUT */}
@@ -137,35 +138,33 @@ Use Akcess to generate and publish events on-chain.        </p>
       "
       >
         {!event && !loadingAI && (
-          <p className="text-sm opacity-60 leading-relaxed">
-            Describe your event in plain language.
-            <br />
-            <span className="block mt-2">
-              Include:
-              <ul className="list-disc list-inside mt-1 space-y-1">
-                <li>
-                  <strong>Event name</strong> and purpose
-                </li>
-                <li>
-                  <strong>Date</strong> (e.g. “tomorrow”, “June 15”, or a full
-                  date)
-                </li>
-                <li>
-                  <strong>Price in BNB</strong> (e.g. 0.000001)
-                </li>
-                <li>
-                  <strong>Max attendees</strong> (or say “unlimited”)
-                </li>
-              </ul>
-            </span>
-            <span className="block mt-2">
-              Example:
+          <div className="text-sm opacity-60 leading-relaxed">
+            <p className="mb-1">Include:</p>
+
+            <ul className="list-disc list-inside space-y-1">
+              <li>
+                <strong>Event name</strong> and purpose
+              </li>
+              <li>
+                <strong>Date</strong> (e.g. “tomorrow”, “June 15”, or a full
+                date)
+              </li>
+              <li>
+                <strong>Price in BNB</strong> (e.g. 0.000001)
+              </li>
+              <li>
+                <strong>Max attendees</strong> (or say “unlimited”)
+              </li>
+            </ul>
+
+            <div className="mt-3">
+              <span className="block">Example:</span>
               <em className="block mt-1">
                 “Create a fresher’s party tomorrow, price 0.000001 BNB,
                 unlimited seats”
               </em>
-            </span>
-          </p>
+            </div>
+          </div>
         )}
 
         {loadingAI && <p className="text-sm opacity-70">Thinking…</p>}
