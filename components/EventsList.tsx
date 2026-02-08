@@ -66,7 +66,10 @@ function EventCard({ eventId }: { eventId: bigint }) {
   const isFull =
     event.maxAttendees > BigInt(0) && event.totalBooked >= event.maxAttendees;
 
-  const checkInUrl = "http://localhost:3000/checkin";
+  const checkInUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/checkin?eventId=${eventId.toString()}`
+      : "";
 
   function handleToggleQR() {
     setShowQR((prev) => {
@@ -251,9 +254,7 @@ function EventCard({ eventId }: { eventId: bigint }) {
 
           {showQR && (
             <div className="rounded-lg border p-3 text-center space-y-2">
-              <p className="text-xs opacity-70">
-                Scan to verify booking
-              </p>
+              <p className="text-xs opacity-70">Scan to verify booking</p>
 
               <div className="inline-block bg-white p-2">
                 <QRCode value={checkInUrl} size={140} />
