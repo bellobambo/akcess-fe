@@ -9,6 +9,8 @@ import {
   useBookEvent,
   useCheckIn,
   useAttendeeStatus,
+  useCancelEvent,
+  useWithdrawFunds,
 } from "@/utils/useContractHook";
 import { motion } from "framer-motion";
 import QRCode from "react-qr-code";
@@ -16,22 +18,12 @@ import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/utils/contract";
 
 export function EventsList() {
   const { eventIds, isLoading, error } = useAllEventIds();
-  console.log(
-    "[EventsList] All eventIds from chain:",
-    eventIds?.map((id) => id.toString()),
-  );
 
-  if (isLoading) {
-    return <p className="text-sm opacity-70">Loading events…</p>;
-  }
-
-  if (error) {
+  if (isLoading) return <p className="text-sm opacity-70">Loading events…</p>;
+  if (error)
     return <p className="text-sm text-red-500">Failed to load events</p>;
-  }
-
-  if (!eventIds.length) {
+  if (!eventIds.length)
     return <p className="text-sm opacity-70">No events available</p>;
-  }
 
   return (
     <div className="space-y-4">
@@ -57,12 +49,16 @@ function EventCard({ eventId }: { eventId: bigint }) {
 
   const { bookEvent, isPending: isBooking } = useBookEvent();
   const { checkIn, isPending: isCheckingIn } = useCheckIn();
+  const { cancelEvent, isPending: isCancelling } = useCancelEvent();
+  const { withdrawFunds, isPending: isWithdrawing } = useWithdrawFunds();
 
   const [showQR, setShowQR] = useState(false);
 
   if (!data) return null;
-
   const event = data as any;
+
+  const isOrganizer =
+    address && event.organizer.toLowerCase() === address.toLowerCase();
 
   const isBooked = status?.[0] ?? false;
   const isCheckedIn = status?.[1] ?? false;
@@ -75,12 +71,9 @@ function EventCard({ eventId }: { eventId: bigint }) {
   function handleToggleQR() {
     setShowQR((prev) => {
       const next = !prev;
-
       if (next) {
         localStorage.setItem("akcess:checkin:eventId", eventId.toString());
-        console.log("[QR] Saved eventId to localStorage:", eventId.toString());
       }
-
       return next;
     });
   }
@@ -116,7 +109,74 @@ function EventCard({ eventId }: { eventId: bigint }) {
         backgroundColor: "var(--color-bg)",
       }}
     >
-      <h3 className="font-semibold">{event.title}</h3>
+      {/* HEADER */}
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="font-semibold leading-tight">{event.title}</h3>
+        {isOrganizer && (
+          <div className="flex gap-2">
+            {/* Cancel event */}
+          <motion.button
+  onClick={() =>
+    cancelEvent({
+      address: CONTRACT_ADDRESS,
+      abi: CONTRACT_ABI,
+      functionName: "cancelEvent",
+      args: [eventId],
+    })
+  }
+  disabled={isCancelling}
+  className="
+    px-3 py-1.5
+    text-xs font-medium
+    rounded-md
+    border cursor-pointer
+  "
+  style={{
+    borderColor: "#E35D8F",
+    color: "#E35D8F",
+    backgroundColor: "transparent",
+    opacity: isCancelling ? 0.6 : 1,
+  }}
+  whileHover={!isCancelling ? { scale: 1.03 } : {}}
+  whileTap={!isCancelling ? { scale: 0.97 } : {}}
+>
+  {isCancelling ? "Cancelling…" : "Cancel event"}
+</motion.button>
+
+
+            {/* Withdraw funds */}
+            {event.totalBooked > BigInt(0) && (
+              <motion.button
+                onClick={() =>
+                  withdrawFunds({
+                    address: CONTRACT_ADDRESS,
+                    abi: CONTRACT_ABI,
+                    functionName: "withdrawFunds",
+                    args: [eventId],
+                  })
+                }
+                disabled={isWithdrawing}
+                className="
+          px-3 py-1.5
+          text-xs font-medium
+          rounded-md
+          text-white cursor-pointer
+        "
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  opacity: isWithdrawing ? 0.6 : 1,
+                }}
+                whileHover={!isWithdrawing ? { scale: 1.03 } : {}}
+                whileTap={!isWithdrawing ? { scale: 0.97 } : {}}
+              >
+                {isWithdrawing ? "Withdrawing…" : "Withdraw funds"}
+              </motion.button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* DESCRIPTION */}
       <p className="text-sm opacity-80">{event.description}</p>
 
       {/* EVENT DETAILS */}
@@ -146,38 +206,29 @@ function EventCard({ eventId }: { eventId: bigint }) {
         <motion.button
           onClick={handleBook}
           disabled={!isConnected || isFull || isBooking}
-          className="w-full rounded-lg px-4 py-2 text-white font-semibold"
+          className="w-full rounded-lg px-4 py-2 text-white font-semibold cursor-pointer"
           style={{
             backgroundColor: isFull ? "#ef4444" : "var(--color-primary)",
             opacity: isBooking ? 0.7 : 1,
           }}
-          whileHover={!isBooking ? { scale: 1.03 } : {}}
-          whileTap={!isBooking ? { scale: 0.97 } : {}}
         >
           {isBooking ? "Booking…" : isFull ? "Event full" : "Book event"}
         </motion.button>
       )}
 
       {/* CHECK-IN + QR */}
-      {/* CHECK-IN ACTIONS (BOOKED USERS) */}
       {isBooked && (
         <div className="space-y-3">
-          {/* STATUS */}
-         
-
-          {/* BUTTONS */}
           <div className="flex gap-2">
             {!isCheckedIn && (
               <motion.button
                 onClick={handleCheckIn}
                 disabled={isCheckingIn}
-                className="flex-1 rounded-lg px-4 py-2 text-white font-semibold"
+                className="flex-1 rounded-lg px-4 py-2 text-white font-semibold cursor-pointer"
                 style={{
                   backgroundColor: "var(--color-primary)",
                   opacity: isCheckingIn ? 0.7 : 1,
                 }}
-                whileHover={!isCheckingIn ? { scale: 1.03 } : {}}
-                whileTap={!isCheckingIn ? { scale: 0.97 } : {}}
               >
                 {isCheckingIn ? "Checking in…" : "Check in"}
               </motion.button>
@@ -185,19 +236,16 @@ function EventCard({ eventId }: { eventId: bigint }) {
 
             <motion.button
               onClick={handleToggleQR}
-              className="flex-1 rounded-lg px-4 py-2 font-semibold border"
+              className="flex-1 rounded-lg px-4 py-2 font-semibold border cursor-pointer"
               style={{
                 borderColor: "var(--color-border)",
                 backgroundColor: "var(--color-bg)",
               }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
             >
               {showQR ? "Hide QR" : "Show QR"}
             </motion.button>
           </div>
 
-          {/* QR CODE */}
           {showQR && (
             <div className="rounded-lg border p-3 text-center space-y-2">
               <p className="text-xs opacity-70">
@@ -214,7 +262,6 @@ function EventCard({ eventId }: { eventId: bigint }) {
         </div>
       )}
 
-      {/* CHECKED IN */}
       {isCheckedIn && (
         <div className="text-sm font-medium text-green-600 text-center">
           You are checked in

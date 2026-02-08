@@ -122,10 +122,9 @@ export function AICreateEvent() {
         className="px-6 py-4 border-b"
         style={{ borderColor: "var(--color-border)" }}
       >
-        <h2 className="text-lg font-semibold">AI Event Creator</h2>
+        <h2 className="text-lg font-semibold">Akcess Agent</h2>
         <p className="text-xs opacity-70">
-          Describe your event and let AI structure it
-        </p>
+Use Akcess to generate and publish events on-chain.        </p>
       </div>
 
       {/* CHAT / AI OUTPUT */}
@@ -234,7 +233,7 @@ export function AICreateEvent() {
             <motion.button
               onClick={createEventOnchain}
               disabled={isCreatingOnchain}
-              className="w-full rounded-lg px-4 py-2 font-semibold text-white"
+              className="w-full rounded-lg px-4 py-2 font-semibold text-white cursor-pointer"
               style={{
                 backgroundColor: "var(--color-primary)",
                 opacity: isCreatingOnchain ? 0.6 : 1,
@@ -280,7 +279,7 @@ export function AICreateEvent() {
         <motion.button
           onClick={generateEvent}
           disabled={!prompt || loadingAI || aiLocked}
-          className="mt-3 w-full rounded-xl px-4 py-3 font-semibold text-white transition-opacity"
+          className="mt-3 w-full rounded-xl px-4 py-3 font-semibold text-white transition-opacity cursor-pointer"
           style={{
             backgroundColor: "var(--color-primary)",
             opacity: aiLocked ? 0.6 : 1, // 👈 visual feedback

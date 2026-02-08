@@ -27,8 +27,8 @@ export function WalletConnect() {
         : '0.0000'
 
     return (
-      <div className="flex items-center gap-4 rounded-xl bg-white/70 px-4 py-3 border"
-           style={{ borderColor: 'var(--color-border)' }}>
+      <div className="flex items-center gap-4 rounded-xl bg-white/70 px-4 py-1 "
+          >
         {/* Wallet Info */}
         <div className="flex flex-col text-sm">
           <span className="font-semibold">

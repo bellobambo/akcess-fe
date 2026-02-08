@@ -20,8 +20,7 @@ export function Navbar() {
       }}
     >
       <h1 className="font-semibold text-lg">
-        Event Booking
-      </h1>
+Akcess      </h1>
 
       <WalletConnect />
     </header>

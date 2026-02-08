@@ -10,15 +10,15 @@ export default function Home() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
-      {/* TOP NAV */}
+      {/* TOP NAV (fixed height) */}
       <Navbar />
 
-      {/* MAIN SPLIT INTERFACE */}
-      <main className="flex-1 flex">
-        {/* LEFT PANEL — WIDER */}
+      {/* MAIN AREA (fills remaining height) */}
+      <main className="flex flex-1 overflow-hidden">
+        {/* LEFT: SCROLLABLE EVENTS LIST */}
         <section
           className="
             flex-[3]
@@ -29,31 +29,32 @@ export default function Home() {
           <EventsList />
         </section>
 
-        {/* VERTICAL DIVIDER */}
+        {/* DIVIDER */}
         <div
           className="hidden lg:block w-px"
           style={{ backgroundColor: "var(--color-border)" }}
         />
 
-   {/* RIGHT PANEL — NARROWER (AI AGENT STYLE) */}
-<section
-  className="
-    flex-[2]
-    p-6
-    overflow-hidden
-    flex
-    flex-col
-  "
->
-  {isConnected ? (
-    <AICreateEvent />
-  ) : (
-    <div className="h-full flex items-center justify-center text-sm opacity-70">
-      Connect your wallet to create events
-    </div>
-  )}
-</section>
-
+        {/* RIGHT: STICKY AI PANEL */}
+        <section
+          className="
+            flex-[2]
+            p-6
+            overflow-hidden
+            flex
+            justify-start
+          "
+        >
+          <div className="w-full sticky top-6">
+            {isConnected ? (
+              <AICreateEvent />
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-sm opacity-70">
+                Connect your wallet to create events
+              </div>
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );
