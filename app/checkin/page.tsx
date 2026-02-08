@@ -12,59 +12,59 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 export default function CheckInPage() {
-  const [eventId, setEventId] = useState<bigint | undefined>(undefined);
-  const [ready, setReady] = useState(false);
   const router = useRouter();
+  const { address, isConnected } = useAccount();
 
-  /* ---------------------------------------------------------------------- */
-  /* Read eventId from localStorage                                          */
-  /* ---------------------------------------------------------------------- */
+  const [eventId, setEventId] = useState<bigint | undefined>();
+  const [attendee, setAttendee] = useState<`0x${string}` | undefined>();
+  const [ready, setReady] = useState(false);
+
+  /* ------------------------------------------------------------------ */
+  /* Read QR params (eventId + attendee wallet)                          */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
-    const stored = localStorage.getItem("akcess:checkin:eventId");
-    console.log("[CheckInPage] Stored eventId:", stored);
+    const params = new URLSearchParams(window.location.search);
+    const eventIdParam = params.get("eventId");
+    const attendeeParam = params.get("attendee");
 
-    if (stored !== null) {
-      try {
-        setEventId(BigInt(stored));
-      } catch {
-        console.error("[CheckInPage] Invalid eventId in storage");
-      }
+    if (!eventIdParam || !attendeeParam) {
+      setReady(true);
+      return;
+    }
+
+    try {
+      setEventId(BigInt(eventIdParam));
+      setAttendee(attendeeParam as `0x${string}`);
+    } catch {
+      console.error("Invalid QR parameters");
     }
 
     setReady(true);
   }, []);
 
-  const { address, isConnected } = useAccount();
   const { data: event } = useGetEvent(eventId);
-  const { data: status } = useAttendeeStatus(eventId, address);
+  const { data: status } = useAttendeeStatus(eventId, attendee);
   const { checkIn, isPending } = useCheckIn();
-
-  /* ---------------------------------------------------------------------- */
-  /* Guards                                                                 */
-  /* ---------------------------------------------------------------------- */
-  if (!ready) {
-    return (
-      <PageShell>
-        <p className="text-sm opacity-70 text-center">Loading check-in…</p>
-      </PageShell>
-    );
-  }
-
-  if (eventId === undefined) {
-    return (
-      <PageShell>
-        <p className="text-sm opacity-70 text-center">
-          No event selected for check-in
-        </p>
-      </PageShell>
-    );
-  }
 
   const isBooked = status?.[0] ?? false;
   const isCheckedIn = status?.[1] ?? false;
 
-  function handleCheckIn() {
-    if (!isConnected || !isBooked || isCheckedIn || eventId === undefined)
+  const isOrganizer =
+    isConnected &&
+    event &&
+    address?.toLowerCase() === event.organizer.toLowerCase();
+
+  /* ------------------------------------------------------------------ */
+  /* Organizer-only check-in                                             */
+  /* ------------------------------------------------------------------ */
+  function handleOrganizerCheckIn() {
+    if (
+      !isOrganizer ||
+      !eventId ||
+      !attendee ||
+      !isBooked ||
+      isCheckedIn
+    )
       return;
 
     checkIn({
@@ -75,27 +75,41 @@ export default function CheckInPage() {
     });
   }
 
-  /* ---------------------------------------------------------------------- */
-  /* UI                                                                     */
-  /* ---------------------------------------------------------------------- */
+  /* ------------------------------------------------------------------ */
+  /* Guards                                                             */
+  /* ------------------------------------------------------------------ */
+  if (!ready) {
+    return (
+      <PageShell>
+        <p className="text-sm opacity-70 text-center">Loading scan…</p>
+      </PageShell>
+    );
+  }
+
+  if (!eventId || !attendee) {
+    return (
+      <PageShell>
+        <p className="text-sm opacity-70 text-center">
+          Invalid or incomplete QR code
+        </p>
+      </PageShell>
+    );
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* UI                                                                 */
+  /* ------------------------------------------------------------------ */
   return (
     <PageShell>
-      {/* BACK BUTTON – TOP LEFT */}
+      {/* BACK */}
       <motion.button
         onClick={() => router.back()}
-        aria-label="Go back"
-        className="
-          absolute top-4 left-4
-          text-xl font-semibold
-          opacity-70 hover:opacity-100 cursor-pointer
-        "
+        className="absolute top-4 left-4 text-xl opacity-70 hover:opacity-100"
         whileHover={{ x: -3 }}
-        whileTap={{ scale: 0.95 }}
       >
         &lt;
       </motion.button>
 
-      {/* MAIN CARD */}
       <div
         className="rounded-xl border p-6 space-y-4 w-full max-w-sm"
         style={{
@@ -103,10 +117,12 @@ export default function CheckInPage() {
           backgroundColor: "var(--color-bg)",
         }}
       >
-        <h1 className="text-lg font-semibold text-center">Event check-in</h1>
+        <h1 className="text-lg font-semibold text-center">
+          Organizer Scan Mode
+        </h1>
 
         {event && (
-          <div className="text-sm space-y-1 opacity-80 text-center">
+          <div className="text-sm text-center opacity-80">
             <p className="font-medium">{event.title}</p>
             <p>{event.description}</p>
           </div>
@@ -114,46 +130,64 @@ export default function CheckInPage() {
 
         {!isConnected && (
           <p className="text-sm text-center opacity-70">
-            Connect your wallet to continue
+            Connect organizer wallet
           </p>
         )}
 
-        {isConnected && !isBooked && (
-          <p className="text-sm text-center opacity-70">
-            This wallet has not booked this event
+        {isConnected && !isOrganizer && (
+          <p className="text-sm text-center text-red-500">
+            Only the event organizer can scan tickets
           </p>
         )}
 
-        {isConnected && isBooked && !isCheckedIn && (
-          <div className="text-sm text-center text-blue-600 font-medium">
-            You have already booked this event
+        {isOrganizer && (
+          <div className="rounded-lg border p-3 text-xs space-y-1 bg-yellow-50">
+            <p className="font-semibold text-yellow-700 text-center">
+              Scan Details
+            </p>
+
+            <p className="break-all">
+              <span className="font-medium">Attendee Wallet:</span>
+              <br />
+              {attendee}
+            </p>
+
+            <p>
+              <span className="font-medium">Booked:</span>{" "}
+              {isBooked ? "Yes" : "No"}
+            </p>
+
+            <p>
+              <span className="font-medium">Checked In:</span>{" "}
+              {isCheckedIn ? "Yes" : "No"}
+            </p>
           </div>
         )}
 
-        {isBooked && !isCheckedIn && (
+        {/* {isOrganizer && isBooked && !isCheckedIn && (
           <motion.button
-            onClick={handleCheckIn}
+            onClick={handleOrganizerCheckIn}
             disabled={isPending}
             className="w-full rounded-lg px-4 py-2 font-semibold text-white"
             style={{
-              backgroundColor: "var(--color-primary)",
+              backgroundColor: "#16a34a",
               opacity: isPending ? 0.7 : 1,
             }}
             whileHover={!isPending ? { scale: 1.03 } : {}}
             whileTap={!isPending ? { scale: 0.97 } : {}}
           >
-            {isPending ? "Checking in…" : "Confirm check-in"}
+            {isPending ? "Checking in…" : "Check in attendee"}
           </motion.button>
-        )}
+        )} */}
 
         {isCheckedIn && (
           <div className="text-sm text-center text-green-600 font-medium">
-            Check-in successful
+            Attendee already checked in
           </div>
         )}
 
         <p className="text-xs opacity-60 text-center">
-          Check-in is recorded on-chain and can only be done once per wallet
+          Organizer-only scan · Verified on-chain
         </p>
       </div>
     </PageShell>

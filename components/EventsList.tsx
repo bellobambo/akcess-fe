@@ -66,10 +66,11 @@ function EventCard({ eventId }: { eventId: bigint }) {
   const isFull =
     event.maxAttendees > BigInt(0) && event.totalBooked >= event.maxAttendees;
 
-  const checkInUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/checkin?eventId=${eventId.toString()}`
-      : "";
+const checkInUrl =
+  address && typeof window !== "undefined"
+    ? `${window.location.origin}/checkin?eventId=${eventId.toString()}&attendee=${address}`
+    : "";
+
 
   function handleToggleQR() {
     setShowQR((prev) => {
