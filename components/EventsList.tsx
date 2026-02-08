@@ -66,11 +66,10 @@ function EventCard({ eventId }: { eventId: bigint }) {
   const isFull =
     event.maxAttendees > BigInt(0) && event.totalBooked >= event.maxAttendees;
 
-const checkInUrl =
-  address && typeof window !== "undefined"
-    ? `${window.location.origin}/checkin?eventId=${eventId.toString()}&attendee=${address}`
-    : "";
-
+  const checkInUrl =
+    address && typeof window !== "undefined"
+      ? `${window.location.origin}/checkin?eventId=${eventId.toString()}&attendee=${address}`
+      : "";
 
   function handleToggleQR() {
     setShowQR((prev) => {
@@ -252,17 +251,23 @@ const checkInUrl =
               {showQR ? "Hide QR" : "Show QR"}
             </motion.button>
           </div>
-
-          {showQR && (
+          {showQR && address && (
             <div className="rounded-lg border p-3 text-center space-y-2">
               <p className="text-xs opacity-70">Scan to verify booking</p>
 
               <div className="inline-block bg-white p-2">
-                <QRCode value={checkInUrl} size={140} />
+                <QRCode
+                  value={`${window.location.origin}/checkin?eventId=${eventId.toString()}&attendee=${address}`}
+                  size={140}
+                />
               </div>
-
-              {/* <p className="text-xs break-all opacity-60">{checkInUrl}</p> */}
             </div>
+          )}
+
+          {showQR && !address && (
+            <p className="text-xs text-center opacity-60">
+              Waiting for wallet…
+            </p>
           )}
         </div>
       )}
