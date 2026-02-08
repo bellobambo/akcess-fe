@@ -5,10 +5,11 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
   useAccount,
-  useWatchContractEvent, // 👈 only used in OPTIONAL section
+  useWatchContractEvent,
 } from "wagmi";
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "./contract";
+import toast from "react-hot-toast";
 
 /* -------------------------------------------------------------------------- */
 /*                                    TYPES                                   */
@@ -35,7 +36,6 @@ export interface AttendeeStatus {
 /*                                   READERS                                  */
 /* -------------------------------------------------------------------------- */
 
-/** Total number of events created */
 export function useEventCount() {
   return useReadContract({
     address: CONTRACT_ADDRESS,
@@ -44,7 +44,6 @@ export function useEventCount() {
   });
 }
 
-/** Read raw event struct from mapping */
 export function useEvent(eventId: bigint | undefined) {
   return useReadContract({
     address: CONTRACT_ADDRESS,
@@ -55,7 +54,6 @@ export function useEvent(eventId: bigint | undefined) {
   });
 }
 
-/** Read event using getter (preferred) */
 export function useGetEvent(eventId: bigint | undefined) {
   return useReadContract({
     address: CONTRACT_ADDRESS,
@@ -66,23 +64,19 @@ export function useGetEvent(eventId: bigint | undefined) {
   });
 }
 
-/** Get booking + check-in status for a wallet */
 export function useAttendeeStatus(
   eventId: bigint | undefined,
-  attendee: `0x${string}` | undefined
+  attendee: `0x${string}` | undefined,
 ) {
   return useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "attendeeStatus",
     args: eventId !== undefined && attendee ? [eventId, attendee] : undefined,
-    query: {
-      enabled: eventId !== undefined && !!attendee,
-    },
+    query: { enabled: eventId !== undefined && !!attendee },
   });
 }
 
-/** Convenience hook: get all event IDs */
 export function useAllEventIds() {
   const { data: count, isLoading, error } = useEventCount();
 
@@ -91,64 +85,100 @@ export function useAllEventIds() {
     return Array.from({ length: Number(count) }, (_, i) => BigInt(i));
   }, [count]);
 
-  return {
-    eventIds,
-    isLoading,
-    error,
-  };
+  return { eventIds, isLoading, error };
 }
 
 /* -------------------------------------------------------------------------- */
 /*                                   WRITERS                                  */
 /* -------------------------------------------------------------------------- */
 
-/** Create event */
 export function useCreateEvent() {
   const write = useWriteContract();
   return { ...write, createEvent: write.writeContract };
 }
 
-/** Book event (payable) */
 export function useBookEvent() {
   const write = useWriteContract();
   return { ...write, bookEvent: write.writeContract };
 }
 
-/** Check in to event */
 export function useCheckIn() {
   const write = useWriteContract();
   return { ...write, checkIn: write.writeContract };
 }
 
-/** Cancel event (organizer only) */
 export function useCancelEvent() {
   const write = useWriteContract();
   return { ...write, cancelEvent: write.writeContract };
 }
 
-/** Withdraw funds (organizer only) */
 export function useWithdrawFunds() {
   const write = useWriteContract();
   return { ...write, withdrawFunds: write.writeContract };
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              TX STATUS HELPERS                             */
-/* -------------------------------------------------------------------------- */
 
-/** Wait for tx confirmation */
-export function useTxReceipt(hash?: `0x${string}`) {
-  return useWaitForTransactionReceipt({
+export function useTxReceipt(
+  hash?: `0x${string}`,
+  options?: {
+    reload?: boolean;
+    successMessage?: string;
+    errorMessage?: string;
+  },
+) {
+  const {
+    reload = true,
+    successMessage = "Transaction successful",
+    errorMessage = "Transaction failed",
+  } = options || {};
+
+  const result = useWaitForTransactionReceipt({
     hash,
     query: { enabled: !!hash },
   });
+
+  // prevent duplicate toasts on re-render
+  const hasNotified = useRef(false);
+
+  useEffect(() => {
+    if (hasNotified.current) return;
+
+    /** ✅ SUCCESS */
+    if (result.isSuccess) {
+      hasNotified.current = true;
+
+      toast.success(successMessage);
+
+      if (reload) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    }
+
+    /** ❌ ERROR */
+    if (result.isError) {
+      hasNotified.current = true;
+
+      const message =
+        result.error?.message ||
+        errorMessage;
+
+      toast.error(message);
+    }
+  }, [
+    result.isSuccess,
+    result.isError,
+    reload,
+    successMessage,
+    errorMessage,
+    result.error,
+  ]);
+
+  return result;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                USER HELPERS                                */
-/* -------------------------------------------------------------------------- */
 
-/** Check if connected user is organizer of an event */
 export function useIsOrganizer(event: Event | undefined) {
   const { address } = useAccount();
 
@@ -158,23 +188,13 @@ export function useIsOrganizer(event: Event | undefined) {
   }, [event, address]);
 }
 
-/* ========================================================================== */
-/*                              OPTIONAL HOOKS                               */
-/*  These hooks are NOT required for core functionality.                      */
-/*  They are provided for UX improvements (realtime updates, convenience).    */
-/*  You can safely remove this entire section without breaking the app.       */
-/* ========================================================================== */
-
 /* -------------------------------------------------------------------------- */
 /*                     OPTIONAL: Direct mapping access                        */
 /* -------------------------------------------------------------------------- */
 
-/** OPTIONAL: Direct check if a user booked an event
- * Prefer `useAttendeeStatus` instead.
- */
 export function useHasBooked(
   eventId: bigint | undefined,
-  attendee: `0x${string}` | undefined
+  attendee: `0x${string}` | undefined,
 ) {
   return useReadContract({
     address: CONTRACT_ADDRESS,
@@ -185,12 +205,9 @@ export function useHasBooked(
   });
 }
 
-/** OPTIONAL: Direct check if a user checked in
- * Prefer `useAttendeeStatus` instead.
- */
 export function useHasCheckedIn(
   eventId: bigint | undefined,
-  attendee: `0x${string}` | undefined
+  attendee: `0x${string}` | undefined,
 ) {
   return useReadContract({
     address: CONTRACT_ADDRESS,
@@ -202,10 +219,9 @@ export function useHasCheckedIn(
 }
 
 /* -------------------------------------------------------------------------- */
-/*                     OPTIONAL: Event listeners (realtime UX)                */
+/*                     OPTIONAL: Event listeners                               */
 /* -------------------------------------------------------------------------- */
 
-/** OPTIONAL: Listen for new event creation */
 export function useWatchEventCreated(onEvent?: () => void) {
   return useWatchContractEvent({
     address: CONTRACT_ADDRESS,
@@ -217,7 +233,6 @@ export function useWatchEventCreated(onEvent?: () => void) {
   });
 }
 
-/** OPTIONAL: Listen for bookings */
 export function useWatchEventBooked(onEvent?: () => void) {
   return useWatchContractEvent({
     address: CONTRACT_ADDRESS,
@@ -229,7 +244,6 @@ export function useWatchEventBooked(onEvent?: () => void) {
   });
 }
 
-/** OPTIONAL: Listen for check-ins */
 export function useWatchEventCheckedIn(onEvent?: () => void) {
   return useWatchContractEvent({
     address: CONTRACT_ADDRESS,
@@ -241,7 +255,6 @@ export function useWatchEventCheckedIn(onEvent?: () => void) {
   });
 }
 
-/** OPTIONAL: Listen for cancellations */
 export function useWatchEventCancelled(onEvent?: () => void) {
   return useWatchContractEvent({
     address: CONTRACT_ADDRESS,
@@ -253,7 +266,6 @@ export function useWatchEventCancelled(onEvent?: () => void) {
   });
 }
 
-/** OPTIONAL: Listen for withdrawals */
 export function useWatchFundsWithdrawn(onEvent?: () => void) {
   return useWatchContractEvent({
     address: CONTRACT_ADDRESS,

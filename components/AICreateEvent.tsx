@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { parseEther } from "viem";
-import { useCreateEvent } from "@/utils/useContractHook";
+import { useCreateEvent, useTxReceipt } from "@/utils/useContractHook";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/utils/contract";
+
 
 interface AIEventPayload {
   title: string;
@@ -28,6 +29,13 @@ export function AICreateEvent() {
     data: txHash,
     error: txError,
   } = useCreateEvent();
+
+  
+useTxReceipt(txHash, {
+  successMessage: "Event published successfully ",
+  errorMessage: "Event creation failed",
+});
+
 
   async function generateEvent() {
     if (aiLocked) return;

@@ -164,21 +164,7 @@ export default function CheckInPage() {
           </div>
         )}
 
-        {/* {isOrganizer && isBooked && !isCheckedIn && (
-          <motion.button
-            onClick={handleOrganizerCheckIn}
-            disabled={isPending}
-            className="w-full rounded-lg px-4 py-2 font-semibold text-white"
-            style={{
-              backgroundColor: "#16a34a",
-              opacity: isPending ? 0.7 : 1,
-            }}
-            whileHover={!isPending ? { scale: 1.03 } : {}}
-            whileTap={!isPending ? { scale: 0.97 } : {}}
-          >
-            {isPending ? "Checking in…" : "Check in attendee"}
-          </motion.button>
-        )} */}
+  
 
         {isCheckedIn && (
           <div className="text-sm text-center text-green-600 font-medium">
