@@ -20,6 +20,7 @@ export function AICreateEvent() {
   const [loadingAI, setLoadingAI] = useState(false);
   const [event, setEvent] = useState<AIEventPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [aiLocked, setAiLocked] = useState(false);
 
   const {
     createEvent,
@@ -29,7 +30,10 @@ export function AICreateEvent() {
   } = useCreateEvent();
 
   async function generateEvent() {
+    if (aiLocked) return;
+
     setLoadingAI(true);
+    setAiLocked(true); // 🔒 lock after first click
     setError(null);
     setEvent(null);
 
@@ -46,6 +50,7 @@ export function AICreateEvent() {
       setEvent(data);
     } catch (err: any) {
       setError(err.message);
+      setAiLocked(false); // 🔓 unlock if AI fails
     } finally {
       setLoadingAI(false);
     }
@@ -96,99 +101,208 @@ export function AICreateEvent() {
 
   return (
     <div
-      className="w-full max-w-xl space-y-4 rounded-2xl p-6 border"
+      className="
+      h-full
+      w-full
+      max-w-xl
+      mx-auto
+      flex
+      flex-col
+      rounded-2xl
+      border
+    "
       style={{
         backgroundColor: "rgba(255,255,255,0.7)",
         borderColor: "var(--color-border)",
         color: "var(--color-text)",
       }}
     >
-      <h2 className="text-lg font-semibold">Create Event with AI</h2>
-
-      {/* PROMPT INPUT */}
-      <textarea
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Describe your event…"
-        rows={4}
-        className="w-full rounded-lg p-3 text-sm outline-none"
-        style={{
-          backgroundColor: "var(--color-bg)",
-          border: "1px solid var(--color-border)",
-          color: "var(--color-text)",
-        }}
-      />
-
-      {/* AI BUTTON */}
-      <motion.button
-        onClick={generateEvent}
-        disabled={!prompt || loadingAI}
-        className="w-full rounded-xl px-4 py-3 font-semibold text-white"
-        style={{ backgroundColor: "var(--color-primary)" }}
-        whileHover={{
-          scale: 1.03,
-          backgroundColor: "var(--color-primary-hover)",
-        }}
-        whileTap={{ scale: 0.97 }}
+      {/* HEADER */}
+      <div
+        className="px-6 py-4 border-b"
+        style={{ borderColor: "var(--color-border)" }}
       >
-        {loadingAI ? "Generating…" : "Generate with AI"}
-      </motion.button>
-
-      {error && (
-        <p className="text-sm" style={{ color: "var(--color-primary)" }}>
-          {error}
+        <h2 className="text-lg font-semibold">AI Event Creator</h2>
+        <p className="text-xs opacity-70">
+          Describe your event and let AI structure it
         </p>
-      )}
+      </div>
 
-      {/* AI PREVIEW */}
-      {event && (
-        <div
-          className="rounded-xl border p-4 space-y-3"
-          style={{
-            borderColor: event.colorCode || "var(--color-border)",
-            backgroundColor: "var(--color-bg)",
-          }}
-        >
-          <h3 className="font-semibold">{event.title}</h3>
-          <p className="text-sm opacity-80">{event.description}</p>
+      {/* CHAT / AI OUTPUT */}
+      <div
+        className="
+        flex-1
+        overflow-y-auto
+        p-6
+        space-y-4
+      "
+      >
+        {!event && !loadingAI && (
+          <p className="text-sm opacity-60 leading-relaxed">
+            Describe your event in plain language.
+            <br />
+            <span className="block mt-2">
+              Include:
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>
+                  <strong>Event name</strong> and purpose
+                </li>
+                <li>
+                  <strong>Date</strong> (e.g. “tomorrow”, “June 15”, or a full
+                  date)
+                </li>
+                <li>
+                  <strong>Price in BNB</strong> (e.g. 0.000001)
+                </li>
+                <li>
+                  <strong>Max attendees</strong> (or say “unlimited”)
+                </li>
+              </ul>
+            </span>
+            <span className="block mt-2">
+              Example:
+              <em className="block mt-1">
+                “Create a fresher’s party tomorrow, price 0.000001 BNB,
+                unlimited seats”
+              </em>
+            </span>
+          </p>
+        )}
 
-          <div className="text-xs space-y-1 opacity-80">
-            <p>💰 {event.priceBNB} BNB</p>
-            <p>📅 {new Date(event.eventTimeISO).toLocaleString()}</p>
-            {event.maxAttendees && <p>👥 {event.maxAttendees} seats</p>}
-          </div>
+        {loadingAI && <p className="text-sm opacity-70">Thinking…</p>}
 
-          {/* ONCHAIN BUTTON */}
-          <motion.button
-            onClick={createEventOnchain}
-            disabled={isCreatingOnchain}
-            className="w-full rounded-lg px-4 py-2 font-semibold text-white"
-            style={{ backgroundColor: "var(--color-primary)" }}
-            whileHover={{
-              scale: 1.03,
-              backgroundColor: "var(--color-primary-hover)",
+        {error && (
+          <p className="text-sm" style={{ color: "var(--color-primary)" }}>
+            {error}
+          </p>
+        )}
+        {event && (
+          <div
+            className="rounded-xl border p-5 space-y-4"
+            style={{
+              borderColor: event.colorCode || "var(--color-border)",
+              backgroundColor: "var(--color-bg)",
             }}
-            whileTap={{ scale: 0.97 }}
           >
-            {isCreatingOnchain ? "Creating on-chain…" : "Create On-chain Event"}
-          </motion.button>
+            {/* TITLE */}
+            <div>
+              <h3 className="text-base font-semibold">{event.title}</h3>
+              <p className="mt-1 text-sm opacity-80">{event.description}</p>
+            </div>
 
-          {txHash && (
-            <p
-              className="text-xs break-all"
-              style={{ color: "var(--color-primary)" }}
+            {/* DETAILS */}
+            <div className="text-sm space-y-2">
+              <div className="flex justify-between">
+                <span className="opacity-70">Event date & time</span>
+                <span className="font-medium">
+                  {new Date(event.eventTimeISO).toLocaleString()}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="opacity-70">Ticket price</span>
+                <span className="font-medium">
+                  {Number(event.priceBNB) === 0
+                    ? "Free"
+                    : `${event.priceBNB} BNB`}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="opacity-70">Maximum attendees</span>
+                <span className="font-medium">
+                  {event.maxAttendees ? event.maxAttendees : "Unlimited"}
+                </span>
+              </div>
+            </div>
+
+            {/* ON-CHAIN NOTICE */}
+            <div
+              className="rounded-lg p-3 text-xs leading-relaxed mt-8"
+              style={{
+                backgroundColor: "rgba(0,0,0,0.03)",
+                border: "1px solid var(--color-border)",
+              }}
             >
-              Tx sent: {txHash}
-            </p>
-          )}
+              <i>
+                This action publishes the event on the BNB Smart Chain Test
+                Network on-chain and cannot be reversed.
+              </i>
+            </div>
 
-          {txError && (
-            <p className="text-xs" style={{ color: "var(--color-primary)" }}>
-              {txError.message}
-            </p>
-          )}
-        </div>
-      )}
+            {/* CONFIRM BUTTON */}
+            <motion.button
+              onClick={createEventOnchain}
+              disabled={isCreatingOnchain}
+              className="w-full rounded-lg px-4 py-2 font-semibold text-white"
+              style={{
+                backgroundColor: "var(--color-primary)",
+                opacity: isCreatingOnchain ? 0.6 : 1,
+                cursor: isCreatingOnchain ? "not-allowed" : "pointer",
+              }}
+              whileHover={!isCreatingOnchain ? { scale: 1.03 } : {}}
+              whileTap={!isCreatingOnchain ? { scale: 0.97 } : {}}
+            >
+              {isCreatingOnchain ? "Confirming on-chain…" : "Confirm event"}
+            </motion.button>
+
+            {/* TX HASH */}
+            {txHash && (
+              <p
+                className="text-xs break-all"
+                style={{ color: "var(--color-primary)" }}
+              >
+                Transaction submitted: {txHash}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* PROMPT INPUT (BOTTOM) */}
+      <div
+        className="p-4 border-t"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="Describe your event…"
+          rows={3}
+          className="w-full rounded-lg p-3 text-sm outline-none resize-none"
+          style={{
+            backgroundColor: "var(--color-bg)",
+            border: "1px solid var(--color-border)",
+            color: "var(--color-text)",
+          }}
+        />
+
+        <motion.button
+          onClick={generateEvent}
+          disabled={!prompt || loadingAI || aiLocked}
+          className="mt-3 w-full rounded-xl px-4 py-3 font-semibold text-white transition-opacity"
+          style={{
+            backgroundColor: "var(--color-primary)",
+            opacity: aiLocked ? 0.6 : 1, // 👈 visual feedback
+            cursor: aiLocked ? "not-allowed" : "pointer",
+          }}
+          whileHover={
+            aiLocked
+              ? undefined
+              : {
+                  scale: 1.02,
+                  backgroundColor: "var(--color-primary-hover)",
+                }
+          }
+          whileTap={aiLocked ? undefined : { scale: 0.98 }}
+        >
+          {loadingAI
+            ? "Generating…"
+            : aiLocked
+              ? "AI Event Generated"
+              : "Generate with AI"}
+        </motion.button>
+      </div>
     </div>
   );
 }

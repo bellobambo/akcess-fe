@@ -21,6 +21,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hot-toast": "^2.6.0",
+    "react-qr-code": "^2.0.18",
     "viem": "^2.45.1",
     "wagmi": "^3.4.2"
   },
