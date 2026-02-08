@@ -10,46 +10,58 @@ export default function Home() {
 
   return (
     <div
-      className="h-screen flex flex-col overflow-hidden"
+      className="min-h-screen flex flex-col"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
-      {/* TOP NAV (fixed height) */}
+      {/* TOP NAV */}
       <Navbar />
 
-      {/* MAIN AREA (fills remaining height) */}
-      <main className="flex flex-1 overflow-hidden">
-        {/* LEFT: SCROLLABLE EVENTS LIST */}
+      {/* MAIN CONTENT */}
+      <main
+        className="
+          flex-1
+          flex
+          flex-col
+          lg:flex-row
+          overflow-hidden
+        "
+      >
+        {/* EVENTS LIST */}
         <section
           className="
-            flex-[3]
-            p-6
+            w-full
+            lg:flex-[3]
+            p-4
+            lg:p-6
             overflow-y-auto
           "
         >
           <EventsList />
         </section>
 
-        {/* DIVIDER */}
+        {/* DIVIDER (desktop only) */}
         <div
           className="hidden lg:block w-px"
           style={{ backgroundColor: "var(--color-border)" }}
         />
 
-        {/* RIGHT: STICKY AI PANEL */}
+        {/* AI PANEL */}
         <section
           className="
-            flex-[2]
-            p-6
-            overflow-hidden
-            flex
-            justify-start
+            w-full
+            lg:flex-[2]
+            p-4
+            lg:p-6
+            border-t
+            lg:border-t-0
           "
+          style={{ borderColor: "var(--color-border)" }}
         >
-          <div className="w-full sticky top-6">
+          <div className="w-full lg:sticky lg:top-6">
             {isConnected ? (
               <AICreateEvent />
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-sm opacity-70">
+              <div className="h-[240px] flex items-center justify-center text-sm opacity-70">
                 Connect your wallet to create events
               </div>
             )}
