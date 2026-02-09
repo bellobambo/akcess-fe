@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Akcess — AI-Powered On-Chain Event Access
 
-## Getting Started
+Akcess is an AI-driven, blockchain-based event management platform built specifically for the **BNB Smart Chain**. It allows organizers to create events using natural language prompts, publish them as immutable smart contracts, and manage entry through verifiable QR code check-ins on-chain.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### AI-Driven Event Creation
+* **Natural Language Processing:** Create events by describing them in plain English.
+* **Automated Structuring:** The AI extracts the title, date, ticket price (BNB), and capacity, converting them into on-chain data.
+* **Smart Normalization:** Automatically handles time zone adjustments and theme generation.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Secure On-Chain Management (BNB Smart Chain)
+* **Transparent Ticketing:** All events are deployed to a smart contract on the **BNB Smart Chain (Testnet)**, ensuring verifiable and tamper-proof records.
+* **Trustless Payments:** Ticket purchases are handled directly via BSC smart contracts—no middlemen required.
+* **Real-time Attendance:** Bookings and check-in statuses are updated live on the blockchain for full transparency.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Seamless QR Verification
+* **Unique Entry Passes:** Every booking generates a unique, wallet-linked QR code.
+* **One-Tap Validation:** Organizers scan codes to instantly verify wallet ownership and check-in status directly against the blockchain.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* **Frontend:** Next.js (App Router), React, Tailwind CSS, Framer Motion
+* **Blockchain:** Solidity, **BNB Smart Chain (Testnet)**
+* **Web3 Integration:** wagmi, viem
+* **AI Engine:** OpenAI Responses API (Function Calling)
+* **Utilities:** react-qr-code for ticket generation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Smart Contract Information* 
+* **Network:** BNB Smart Chain (Testnet)
+* **Address:** `0x08758DDAbA20d43C1Ead2c9753939755177D25B0`
+* **Source Code:** [AkcessSmartContract Repository](https://github.com/bellobambo/AkcessSmartContract)
+* **Capabilities:** Event deployment, automated fund withdrawals, and role-based access for organizers.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Setup & Installation
+
+1.  **Clone the Repo & Install Dependencies**
+    ```bash
+    npm install
+    ```
+
+2.  **Environment Variables**
+    Create a `.env.local` file and add:
+    ```env
+    OPENAI_API_KEY=your_openai_key
+    NEXT_PUBLIC_BSC_TESTNET_RPC_URL=your_project_id
+    ```
+
+3.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
+    Navigate to `http://localhost:3000` to view the app.
+
+---
+
