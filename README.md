@@ -38,27 +38,6 @@ Akcess is an AI-driven, blockchain-based event management platform built specifi
 * **Source Code:** [AkcessSmartContract Repository](https://github.com/bellobambo/AkcessSmartContract)
 * **Capabilities:** Event deployment, automated fund withdrawals, and role-based access for organizers.
 
----
-
-## Setup & Installation
-
-1.  **Clone the Repo & Install Dependencies**
-    ```bash
-    npm install
-    ```
-
-2.  **Environment Variables**
-    Create a `.env.local` file and add:
-    ```env
-    OPENAI_API_KEY=your_openai_key
-    NEXT_PUBLIC_BSC_TESTNET_RPC_URL=your_project_id
-    ```
-
-3.  **Run Development Server**
-    ```bash
-    npm run dev
-    ```
-    Navigate to `http://localhost:3000` to view the app.
 
 ---
 
