@@ -47,12 +47,12 @@ Follow these steps to run Akcess locally.
 
 1. Prerequisites
 
-* Node.js ≥ 18 (npm -v to check)
-* npm or yarn
+* Node.js installed ≥ 18 (node -v to check)
+* npm or yarn installed (npm -v to check)
 * git installed in your computer (git -v to check)
 * A MetaMask wallet
 * Access to BNB Smart Chain Testnet
-* Testnet BNB (get from BSC faucet)
+* Testnet BNB https://www.bnbchain.org/en/testnet-faucet (get from BSC faucet) 
 
 2. Clone the Repository & install Ddpendencies
 
