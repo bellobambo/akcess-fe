@@ -32,7 +32,7 @@ Akcess is an AI-driven, blockchain-based event management platform built specifi
 
 ---
 
-## Smart Contract Information* 
+## Smart Contract Information
 * **Network:** BNB Smart Chain (Testnet)
 * **Address:** `0x08758DDAbA20d43C1Ead2c9753939755177D25B0`
 * **Source Code:** [AkcessSmartContract Repository](https://github.com/bellobambo/AkcessSmartContract)
@@ -41,3 +41,32 @@ Akcess is an AI-driven, blockchain-based event management platform built specifi
 
 ---
 
+## Reproduction instructions
+Follow these steps to run Akcess locally.
+
+
+1. Prerequisites
+
+Node.js ≥ 18
+npm or yarn
+A MetaMask wallet
+Access to BNB Smart Chain Testnet
+Testnet BNB (get from BSC faucet)
+
+2. Clone the Repository & install Ddpendencies
+
+git clone https://github.com/bellobambo/akcess-fe.git
+cd akcess-fe
+npm i
+
+
+3. Environment Setup
+Create a .env.local file in the root of your project and paste the following, replacing the placeholders with your new credentials:
+
+NEXT_PUBLIC_BSC_TESTNET_RPC_URL=https://bsc-testnet.infura.io/v3/YOUR_INFURA_ID
+OPENAI_API_KEY=sk-proj-YOUR_NEW_OPENAI_KEY
+
+4. Run the Project
+npm run dev
+
+Navigate to http://localhost:3000, to see project runing locally
