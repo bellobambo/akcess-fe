@@ -52,7 +52,7 @@ Follow these steps to run Akcess locally.
 * git installed in your computer (git -v to check)
 * A MetaMask wallet
 * Access to BNB Smart Chain Testnet
-* Testnet BNB https://www.bnbchain.org/en/testnet-faucet (get from BSC faucet) 
+* Testnet BNB https://www.bnbchain.org/en/testnet-faucet
 
 2. Clone the Repository & install Ddpendencies
 
