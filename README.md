@@ -45,7 +45,8 @@ Akcess is an AI-driven, blockchain-based event management platform built specifi
 Follow these steps to run Akcess locally.
 
 
-1. Prerequisites
+**1. Prerequisites
+**
 
 * Node.js installed ≥ 18 (node -v to check)
 * npm or yarn installed (npm -v to check)
@@ -54,20 +55,22 @@ Follow these steps to run Akcess locally.
 * Access to BNB Smart Chain Testnet
 * Testnet BNB https://www.bnbchain.org/en/testnet-faucet
 
-2. Clone the Repository & install Ddpendencies
+**2. Clone the Repository & install dpendencies
+**
 
 * git clone https://github.com/bellobambo/akcess-fe.git
 * cd akcess-fe
 * npm i
 
 
-3. Environment Setup
+**3. Environment Setup**
 Create a .env.local file in the root of your project and paste the following, replacing the placeholders with your new credentials:
 
 * NEXT_PUBLIC_BSC_TESTNET_RPC_URL=https://bsc-testnet.infura.io/v3/YOUR_INFURA_ID
 * OPENAI_API_KEY=sk-proj-YOUR_NEW_OPENAI_KEY
 
-4. Run the Project
+**4. Run the Project
+**
 npm run dev
 
 Navigate to http://localhost:3000, to see project runing locally
