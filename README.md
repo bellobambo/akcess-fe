@@ -68,8 +68,8 @@ Create a .env.local file in the root of your project and paste the following, re
 * NEXT_PUBLIC_BSC_TESTNET_RPC_URL=https://bsc-testnet.infura.io/v3/YOUR_INFURA_ID
 * OPENAI_API_KEY=sk-proj-YOUR_NEW_OPENAI_KEY
 
-**4. Run the Project
-**
+**4. Run the Project**
+
 npm run dev
 
 Navigate to http://localhost:3000, to see project runing locally
