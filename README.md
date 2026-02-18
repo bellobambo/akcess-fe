@@ -1,4 +1,4 @@
-# Akcess — AI-Powered On-Chain Event Access
+# Akcess: AI-Powered On-Chain Event Access
 
 Akcess is an AI-driven, blockchain-based event management platform built specifically for the **BNB Smart Chain**. It allows organizers to create events using natural language prompts, publish them as immutable smart contracts, and manage entry through verifiable QR code checks on-chain.
 
@@ -41,7 +41,7 @@ Akcess is an AI-driven, blockchain-based event management platform built specifi
 
 ---
 
-## Reproducable instructions
+## Reproducible instructions
 Follow these steps to run Akcess locally.
 
 
