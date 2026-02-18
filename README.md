@@ -41,7 +41,7 @@ Akcess is an AI-driven, blockchain-based event management platform built specifi
 
 ---
 
-## Reproduction instructions
+## Reproducable instructions
 Follow these steps to run Akcess locally.
 
 
